@@ -1,7 +1,7 @@
 import os
 import openai
 import gradio as gr
-
+def chatbot(input_text):
 # Set your OpenAI API key
 openai.api_key = "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"
 
@@ -80,14 +80,14 @@ def get_response(message):
 
     return response
 
-# Create the Gradio interface
-chatbot_interface = gr.Interface(
-    fn=chatbot_response, 
-    inputs=gr.inputs.Textbox(), 
-    outputs=gr.outputs.Textbox(),
-    live=True,
-    capture_session=True
+response = "Chatbot: You said: " + input_text
+    return response
 
+iface = gr.Interface(
+    fn=chatbot,
+    inputs="text",
+    outputs="text",
+    live=True
 )
-# Run the interface
-chatbot_interface.launch(share=True)
+
+iface.launch()
