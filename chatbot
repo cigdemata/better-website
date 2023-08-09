@@ -80,14 +80,14 @@ def get_response(message):
 
     return response
 
-# Define the Gradio interface
-iface = gr.Interface(
-    fn=get_response,
-    inputs="text",
-    outputs="text",
-    title="Telecom Plan Recommender",
-    description="Enter your preferences separated by commas (data usage, call preference, message preference, budget range)."
-)
+# Create the Gradio interface
+chatbot_interface = gr.Interface(
+    fn=chatbot_response, 
+    inputs=gr.inputs.Textbox(), 
+    outputs=gr.outputs.Textbox(),
+    live=True,
+    capture_session=True
 
-# Launch the Gradio interface
-iface.launch()
+)
+# Run the interface
+chatbot_interface.launch(share=True)
