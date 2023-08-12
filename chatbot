@@ -1,87 +1,79 @@
 import os
 import openai
 import gradio as gr
-def chatbot(input_text):
+
 # Set your OpenAI API key
 openai.api_key = "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"
 
-# Define a dictionary of predefined plan options
 plans = {
-    "basic": {
-        "data": "5 GB",
-        "calls": "100 minutes",
-        "messages": "100 messages",
-        "price": "$10"
-    },
-    "standard": {
-        "data": "10 GB",
-        "calls": "Unlimited",
-        "messages": "Unlimited",
-        "price": "$20"
-    },
-    "premium": {
-        "data": "20 GB",
-        "calls": "Unlimited",
-        "messages": "Unlimited",
-        "price": "$30"
-    }
+    "basic": {"data": "1GB", "minutes": "100", "price": "$10"},
+    "standard": {"data": "5GB", "minutes": "300", "price": "$20"},
+    "premium": {"data": "Unlimited", "minutes": "Unlimited", "price": "$50"}
 }
 
-# Define a list of questions to ask the customer
-questions = [
-    "How much data do you typically use per month? (e.g., 5GB, 10GB, or 20GB)",
-    "Do you make a lot of calls? (yes/no)",
-    "Do you send a lot of messages? (yes/no)",
-    "What is your preferred budget range? (low, medium, high)"
+greetings = ["Hello! Welcome to our telecom chatbot.", "Hi there! How can I assist you today?"]
+
+requirement_messages = [
+    "To help you find the best plan, could you please tell me:",
+    "Sure, I'd be happy to help. Can you provide me with some information?"
 ]
 
-# Define a list of greetings to welcome the user
-greetings = [
-    "Hello! How can I assist you today?",
-    "Hi there! How may I help you?",
-    "Welcome! How can I be of service?"
+faqs = {
+    "Q1": "What are your available plans?",
+    "Q2": "How much data do I get with the basic plan?",
+    "Q3": "What is the price of the premium plan?",
+    "Q4": "Do you offer international minutes?"
+    # Add more FAQs here
+}
+
+invalid_input_messages = [
+    "I'm sorry, I didn't quite understand that. Could you please rephrase?",
+    "Apologies, I'm having trouble understanding. Can you try again?"
 ]
 
-# Define a function to generate a response using OpenAI
-def generate_response(prompt):
-    response = openai.Completion.create(
-        engine="davinci",
-        prompt=prompt,
-        max_tokens=100,
-        temperature=0.6,
-        n=1,
-        stop=None
-    )
-    return response.choices[0].text.strip()
+def greet():
+    return random.choice(greetings)
 
-# Define a function to process the user input and generate a response
-def get_response(message):
-    # Check if the chatbot needs to ask a question
-    if message == "start":
-        return random.choice(greetings)
+def get_requirements():
+    return random.choice(requirement_messages)
 
-    # Gather user responses and generate a prompt
-    user_responses = message.split(",")
-    if len(user_responses) != 4:
-        return random.choice(questions)
+def find_best_plan(data, minutes):
+    if data <= 1 and minutes <= 100:
+        return "basic"
+    elif data <= 5 and minutes <= 300:
+        return "standard"
+    else:
+        return "premium"
 
-    prompt = f"""
-        User preferences:
-        - Data usage: {user_responses[0].strip()}
-        - Calls: {user_responses[1].strip()}
-        - Messages: {user_responses[2].strip()}
-        - Budget range: {user_responses[3].strip()}
+def respond_to_faq(question):
+    if question in faqs:
+        return faqs[question]
+    else:
+        return "I'm sorry, I don't have information about that."
 
-        Based on your preferences, I recommend the following plan: {plans['standard']}
-    """
+def chat(data, minutes, faq):
+    response = []
 
-    # Generate the response using OpenAI
-    response = generate_response(prompt)
+    response.append(greet())
+    response.append(get_requirements())
 
-    return response
+    best_plan = find_best_plan(data, minutes)
+    recommended_plan = plans[best_plan]
 
-response = "Chatbot: You said: " + input_text
-    return response
+    response.append("Based on your requirements, we recommend our '{0}' plan:".format(best_plan))
+    response.append("- Data: {0}".format(recommended_plan['data']))
+    response.append("- Minutes: {0}".format(recommended_plan['minutes']))
+    response.append("- Price: {0}".format(recommended_plan['price']))
+
+    if faq.lower() != "no":
+        response.append("FAQ: {0}".format(respond_to_faq(faq)))
+
+    return "\n".join(response)
+
+iface = gr.Interface(fn=chat, inputs=[gr.inputs.Number(label="Data Usage (GB)"),
+                                      gr.inputs.Number(label="Minutes"),
+                                      gr.inputs.Textbox(label="FAQ (Type Q1, Q2, etc. or type 'no')")],
+                     outputs=gr.outputs.Textbox())
 
 iface = gr.Interface(
     fn=chatbot,
