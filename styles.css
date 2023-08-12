@@ -3,18 +3,14 @@ body {
     margin: 0;
     padding: 0;
 }
-
 .container {
     width: 90%; /* Adjusted container width */
     max-width: 1200px;
     margin: 0 auto;
 }
-
 /* ... Rest of your existing styles ... */
-
 .services-list {
     padding-left: 0; /* Reset padding for list */
-    list-style-type: none; /* Remove bullets */
     text-align: left;
 }
 
@@ -23,8 +19,6 @@ table th, table td {
     border-bottom: 1px solid #ccc;
     text-align: center; /* Center align text in table cells */
 }
-
-
 footer {
     background-color: #F1F1F1;
     padding: 20px 0;
